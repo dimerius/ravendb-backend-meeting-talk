@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using AwesomeRaven.Raven;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -24,6 +25,7 @@ namespace AwesomeRaven
                     configure.AddConsole();
                 })
                 .AddTransient<RavenDemo>()
+                .AddTransient<IRavenClient, RavenClient>()
                 .AddStronglyTypedConfiguration<RavenConfiguration>(AppConfiguration.GetSection("RavenDb:AwesomeRaven"))
                 .BuildServiceProvider();
             

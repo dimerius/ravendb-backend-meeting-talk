@@ -1,15 +1,16 @@
+using AwesomeRaven.Raven;
 using Microsoft.Extensions.Logging;
 
 namespace AwesomeRaven
 {
     public class RavenDemo
     {
-        private RavenConfiguration _ravenConfiguration;
+        private IRavenClient _raven;
         private ILogger<RavenDemo> _logger;
 
-        public RavenDemo(RavenConfiguration ravenConfiguration, ILogger<RavenDemo> logger) =>
-            (_ravenConfiguration, _logger) = (ravenConfiguration, logger);
+        public RavenDemo(IRavenClient raven, ILogger<RavenDemo> logger) =>
+            (_raven, _logger) = (raven, logger);
 
-        public void Execute(string input) => _logger.LogInformation("It works! {0}", _ravenConfiguration.DatabaseGroupName );
+        public void Execute(string input) => _logger.LogInformation("It works! {0}");
     }
 }
