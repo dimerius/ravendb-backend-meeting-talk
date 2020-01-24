@@ -6,8 +6,8 @@ namespace AwesomeRaven
 {
     public class RavenConfiguration
     {    
-        public string[] Urls { get; set; }
-        public string DatabaseGroupName { get; set; }
+        public string[]? Urls { get; set; } 
+        public string? DatabaseGroupName { get; set; }
     }
     
     public static class AwesomeRavenConfigurationExtensions {
