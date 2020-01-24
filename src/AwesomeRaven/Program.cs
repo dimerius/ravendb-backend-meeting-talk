@@ -39,7 +39,7 @@ namespace AwesomeRaven
             var demo = serviceProvider.GetService<RavenDemo>();
             
             var input = Console.ReadLine();
-            demo.Execute(input);
+            demo.Execute(input).Wait();
         }
     }
 }
