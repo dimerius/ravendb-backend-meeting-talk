@@ -68,8 +68,7 @@ namespace AwesomeRaven
         {
             var from = new DateTime(1998, 1, 1);
             var to = new DateTime(1999, 3, 1);
-            var orders = new List<Order>();
-
+            
             using var session = _raven.Store.OpenAsyncSession();
             return await session.Query<Order>()
                 .Where(o => o.OrderedAt >= from && o.OrderedAt <= to)
