@@ -43,7 +43,7 @@ namespace AwesomeRaven
 
             var result = await demo.Execute(PerformOperation.SearchForEmployeeByFullName);
             
-            logger.LogInformation("Requested operation has finished. Check out the operation results!");
+            logger.LogTrace("Requested operation has finished. Check out the operation results!");
             logger.LogInformation(JsonConvert.SerializeObject(result, Formatting.Indented));
         }
     }

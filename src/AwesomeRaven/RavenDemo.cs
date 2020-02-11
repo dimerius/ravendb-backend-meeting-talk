@@ -29,7 +29,9 @@ namespace AwesomeRaven
 
         private async Task<object> SearchForEmployeeByFullNameAsync()
         {
+            _logger.LogInformation("Please input fragments of first and last name separated by space.");
             var employeeName = Console.ReadLine();
+            
             var searchFragments =
                 employeeName?.Split(new char[] {' ', ':', ';'}, StringSplitOptions.RemoveEmptyEntries);
 
