@@ -48,7 +48,7 @@ namespace AwesomeRaven
             
             var employeeQuery =
                 session.Query<Employee>()
-                .Search(e => e.FirstName, firstNameFragment);
+                .Search(e =>  e.FirstName, firstNameFragment);
             
             if (!(lastNameFragment is null))
             {
