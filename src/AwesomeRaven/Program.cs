@@ -1,9 +1,12 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using AwesomeRaven.Raven;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 
 namespace AwesomeRaven
@@ -14,8 +17,8 @@ namespace AwesomeRaven
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", false, reloadOnChange: true)
             .Build();
-        
-        static void Main(string[] args)
+
+        public static async Task Main(string[] args)
         {
             //setup our DI
             var serviceProvider = new ServiceCollection()
@@ -28,18 +31,18 @@ namespace AwesomeRaven
                 .AddTransient<IRavenClient, RavenClient>()
                 .AddStronglyTypedConfiguration<RavenConfiguration>(AppConfiguration.GetSection("RavenDb:AwesomeRaven"))
                 .BuildServiceProvider();
-            
-            
+
+
             var logger = serviceProvider.GetService<ILoggerFactory>()
                 .CreateLogger<Program>();
-            
+
             logger.LogInformation("Finished configuring logging and dependency injection!");
             logger.LogInformation("Application is ready!");
 
             var demo = serviceProvider.GetService<RavenDemo>();
-            
-            var input = Console.ReadLine();
-            demo.Execute(input).Wait();
+
+            var result = await demo.Execute(PerformOperation.SearchForEmployeeByFullName);
+            Console.WriteLine(JsonConvert.SerializeObject(result, Formatting.Indented));
         }
     }
 }
