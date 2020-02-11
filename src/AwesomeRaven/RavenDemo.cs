@@ -35,13 +35,13 @@ namespace AwesomeRaven
             var searchFragments =
                 employeeName?.Split(new char[] {' ', ':', ';'}, StringSplitOptions.RemoveEmptyEntries);
 
-            if (searchFragments?.Length == 0)
+            if (searchFragments is null || searchFragments.Length == 0)
             {
                 return new List<object>();
             }
             
-            var firstName = searchFragments?.FirstOrDefault();
-            var lastName = searchFragments?.Skip(1).LastOrDefault();
+            var firstName = searchFragments.First();
+            var lastName = searchFragments.Skip(1).LastOrDefault();
 
             var firstNameFragment = !(firstName is null) ? $"{firstName}*" : null;
             var lastNameFragment = !(lastName is null) ? $"{lastName}*" : null;
