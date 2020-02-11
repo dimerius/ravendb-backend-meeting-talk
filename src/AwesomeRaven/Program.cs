@@ -13,7 +13,7 @@ namespace AwesomeRaven
 {
     class Program
     {
-        private static IConfiguration AppConfiguration => new ConfigurationBuilder()
+        private static IConfiguration AppConfiguration { get; } = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", false, reloadOnChange: true)
             .Build();
