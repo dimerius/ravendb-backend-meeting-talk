@@ -42,7 +42,9 @@ namespace AwesomeRaven
             var demo = serviceProvider.GetService<RavenDemo>();
 
             var result = await demo.Execute(PerformOperation.SearchForEmployeeByFullName);
-            Console.WriteLine(JsonConvert.SerializeObject(result, Formatting.Indented));
+            
+            logger.LogInformation("Requested operation has finished. Check out the operation results!");
+            logger.LogInformation(JsonConvert.SerializeObject(result, Formatting.Indented));
         }
     }
 }
