@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AwesomeRaven.DTOs.Search;
 using AwesomeRaven.Entities;
 using AwesomeRaven.Raven;
+using AwesomeRaven.Raven.Indexes;
 using Microsoft.Extensions.Logging;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Queries;
@@ -23,6 +25,7 @@ namespace AwesomeRaven
             {
                 PerformOperation.SearchForEmployeeByFullName => await this.SearchForEmployeeByFullNameAsync(),
                 PerformOperation.FetchOrdersInRange => await this.LoadOrdersInRangeAsync(),
+                PerformOperation.SuggestEmployeeNames => await this.SuggestEmployeeNamesAsync(),
                 _ => new object()
             };
 
@@ -33,7 +36,7 @@ namespace AwesomeRaven
             var employeeName = Console.ReadLine();
             
             var searchFragments =
-                employeeName?.Split(new char[] {' ', ':', ';'}, StringSplitOptions.RemoveEmptyEntries);
+                employeeName?.Split(new [] {' ', ':', ';'}, StringSplitOptions.RemoveEmptyEntries);
 
             if (searchFragments is null || searchFragments.Length == 0)
             {
@@ -43,10 +46,11 @@ namespace AwesomeRaven
             var firstName = searchFragments.First();
             var lastName = searchFragments.Skip(1).LastOrDefault();
 
-            var firstNameFragment = !(firstName is null) ? $"{firstName}*" : null;
+            var firstNameFragment = $"{firstName}*";
             var lastNameFragment = !(lastName is null) ? $"{lastName}*" : null;
 
             using var session = _raven.Store.OpenAsyncSession();
+            _logger.LogTrace("Opened a RavenDb connection.");
             
             var employeeQuery =
                 session.Query<Employee>()
@@ -63,9 +67,35 @@ namespace AwesomeRaven
                 .Select(e => new { e.FirstName, e.LastName})
                 .ToListAsync();
             
+            _logger.LogTrace("Executed {amount} call/s to database", session.Advanced.NumberOfRequests);
+            
             return employee;
         }
 
+        private async Task<object> SuggestEmployeeNamesAsync()
+        {
+            _logger.LogInformation("Please try to input full name.");
+            var messedUpName = Console.ReadLine();
+
+            using var session = _raven.Store.OpenAsyncSession();
+            _logger.LogTrace("Opened a RavenDb connection.");
+
+            var suggestedEmployees = await session.Advanced
+                .AsyncDocumentQuery<Employee_Search_ByName.Result, Employee_Search_ByName>()
+                .WhereEquals(e => e.FullName, messedUpName)
+                .Fuzzy(0.5m)
+                .Take(20)
+                .SelectFields<SuggestedEmployee>()
+                .ToListAsync();
+            
+            var suggestedNames = suggestedEmployees.Select(e => $"{e.FirstName} {e.LastName}");
+            
+            _logger.LogTrace("Executed {amount} call/s to database", session.Advanced.NumberOfRequests);
+            _logger.LogInformation("Did you mean any of these employees?");
+            
+            return suggestedNames;
+        }
+        
         private async Task<IEnumerable<Order>> LoadOrdersInRangeAsync()
         {
             var from = new DateTime(1998, 1, 1);
@@ -81,6 +111,7 @@ namespace AwesomeRaven
     public enum PerformOperation
     {
         SearchForEmployeeByFullName,
+        SuggestEmployeeNames,
         FetchOrdersInRange
     }
 }
