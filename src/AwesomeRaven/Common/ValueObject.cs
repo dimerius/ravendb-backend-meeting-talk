@@ -30,8 +30,8 @@ namespace AwesomeRaven.Common
                 return false;
             }
 
-            var other = (ValueObject)obj;
-            
+            var other = (ValueObject) obj;
+
             using var thisValues = GetAtomicValues().GetEnumerator();
             using var otherValues = other.GetAtomicValues().GetEnumerator();
 
