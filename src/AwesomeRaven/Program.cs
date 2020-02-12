@@ -28,7 +28,7 @@ namespace AwesomeRaven
                     configure.AddConsole();
                 })
                 .AddTransient<RavenDemo>()
-                .AddTransient<IRavenClient, RavenClient>()
+                .AddSingleton<IRavenClient, RavenClient>()
                 .AddStronglyTypedConfiguration<RavenConfiguration>(AppConfiguration.GetSection("RavenDb:AwesomeRaven"))
                 .BuildServiceProvider();
 
