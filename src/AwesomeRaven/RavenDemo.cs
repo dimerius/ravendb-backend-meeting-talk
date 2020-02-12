@@ -34,15 +34,15 @@ namespace AwesomeRaven
         {
             _logger.LogInformation("Please input fragments of first and last name separated by space.");
             var employeeName = Console.ReadLine();
-            
+
             var searchFragments =
-                employeeName?.Split(new [] {' ', ':', ';'}, StringSplitOptions.RemoveEmptyEntries);
+                employeeName?.Split(new[] {' ', ':', ';'}, StringSplitOptions.RemoveEmptyEntries);
 
             if (searchFragments is null || searchFragments.Length == 0)
             {
                 return new List<object>();
             }
-            
+
             var firstName = searchFragments.First();
             var lastName = searchFragments.Skip(1).LastOrDefault();
 
@@ -51,24 +51,24 @@ namespace AwesomeRaven
 
             using var session = _raven.Store.OpenAsyncSession();
             _logger.LogTrace("Opened a RavenDb connection.");
-            
+
             var employeeQuery =
                 session.Query<Employee>()
-                .Search(e =>  e.FirstName, firstNameFragment);
-            
+                    .Search(e => e.FirstName, firstNameFragment);
+
             if (!(lastNameFragment is null))
             {
                 employeeQuery = employeeQuery
                     .Search(e => e.LastName, lastNameFragment, boost: 5, options: SearchOptions.And);
             }
-            
+
             var employee = await employeeQuery
                 .Take(20)
-                .Select(e => new { e.FirstName, e.LastName})
+                .Select(e => new {e.FirstName, e.LastName})
                 .ToListAsync();
-            
+
             _logger.LogTrace("Executed {amount} call/s to database", session.Advanced.NumberOfRequests);
-            
+
             return employee;
         }
 
@@ -87,20 +87,20 @@ namespace AwesomeRaven
                 .Take(20)
                 .SelectFields<SuggestedEmployee>()
                 .ToListAsync();
-            
+
             var suggestedNames = suggestedEmployees.Select(e => $"{e.FirstName} {e.LastName}");
-            
+
             _logger.LogTrace("Executed {amount} call/s to database", session.Advanced.NumberOfRequests);
             _logger.LogInformation("Did you mean any of these employees?");
-            
+
             return suggestedNames;
         }
-        
+
         private async Task<IEnumerable<Order>> LoadOrdersInRangeAsync()
         {
             var from = new DateTime(1998, 1, 1);
             var to = new DateTime(1999, 3, 1);
-            
+
             using var session = _raven.Store.OpenAsyncSession();
             return await session.Query<Order>()
                 .Where(o => o.OrderedAt >= from && o.OrderedAt <= to)
