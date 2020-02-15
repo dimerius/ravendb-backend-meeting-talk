@@ -1,0 +1,9 @@
+version: '2.4'
+
+services:
+    awesome-raven-demo:
+        restart: always
+        image: ravendb/ravendb:4.2.8-ubuntu.18.04-x64
+        ports:
+            - 8080:8080
+            - 38888:38888
