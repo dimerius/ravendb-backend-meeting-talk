@@ -115,8 +115,7 @@ namespace AwesomeRaven
             var subscriptionName= _raven.Store.Subscriptions.Create<Product>();
 
             var options = new SubscriptionWorkerOptions(subscriptionName);
-
-            options.MaxErroneousPeriod = TimeSpan.FromHours(2);
+            options.MaxErroneousPeriod = TimeSpan.FromMinutes(2);
             options.TimeToWaitBeforeConnectionRetry = TimeSpan.FromSeconds(5);
 
             var subscriptionWorker = _raven.Store.Subscriptions.GetSubscriptionWorker<Product>(options);
@@ -126,11 +125,9 @@ namespace AwesomeRaven
                 _logger.LogWarning("Error during subscription processing: {subscriptionName} {exception}",
                     subscriptionName, exception);
             };
-
-
+            
             var cancellationTokenSource = new CancellationTokenSource();
             var ct = cancellationTokenSource.Token;
-            
 
             Task.Run(async () =>
             {
