@@ -114,9 +114,11 @@ namespace AwesomeRaven
         {
             var subscriptionName= _raven.Store.Subscriptions.Create<Product>();
 
-            var options = new SubscriptionWorkerOptions(subscriptionName);
-            options.MaxErroneousPeriod = TimeSpan.FromMinutes(2);
-            options.TimeToWaitBeforeConnectionRetry = TimeSpan.FromSeconds(5);
+            var options = new SubscriptionWorkerOptions(subscriptionName)
+            {
+                MaxErroneousPeriod = TimeSpan.FromMinutes(2),
+                TimeToWaitBeforeConnectionRetry = TimeSpan.FromSeconds(5)
+            };
 
             var subscriptionWorker = _raven.Store.Subscriptions.GetSubscriptionWorker<Product>(options);
                 
@@ -139,7 +141,7 @@ namespace AwesomeRaven
                         {
                             foreach (var item in batch.Items)
                             {
-                                _logger.LogInformation($"Product have changed {item.Id}");
+                                _logger.LogInformation("Product have changed {id}", item.Id);
                             }
                         }, ct);
                     }
