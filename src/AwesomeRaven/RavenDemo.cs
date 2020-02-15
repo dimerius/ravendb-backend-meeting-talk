@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AwesomeRaven.DTOs.Search;
 using AwesomeRaven.Entities;
@@ -9,6 +10,7 @@ using AwesomeRaven.Raven.Indexes;
 using Microsoft.Extensions.Logging;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Queries;
+using Raven.Client.Documents.Subscriptions;
 
 namespace AwesomeRaven
 {
@@ -26,6 +28,7 @@ namespace AwesomeRaven
                 PerformOperation.SearchForEmployeeByFullName => await this.SearchForEmployeeByFullNameAsync(),
                 PerformOperation.FetchOrdersInRange => await this.LoadOrdersInRangeAsync(),
                 PerformOperation.SuggestEmployeeNames => await this.SuggestEmployeeNamesAsync(),
+                PerformOperation.SubscribeToProductCollection => SubscribeToProductCollection(),
                 _ => new object()
             };
 
@@ -106,10 +109,61 @@ namespace AwesomeRaven
                 .Where(o => o.OrderedAt >= from && o.OrderedAt <= to)
                 .ToListAsync();
         }
+
+        private object SubscribeToProductCollection()
+        {
+            var subscriptionName= _raven.Store.Subscriptions.Create<Product>();
+
+            var options = new SubscriptionWorkerOptions(subscriptionName);
+
+            options.MaxErroneousPeriod = TimeSpan.FromHours(2);
+            options.TimeToWaitBeforeConnectionRetry = TimeSpan.FromSeconds(5);
+
+            var subscriptionWorker = _raven.Store.Subscriptions.GetSubscriptionWorker<Product>(options);
+                
+            subscriptionWorker.OnSubscriptionConnectionRetry += exception =>
+            {
+                _logger.LogWarning("Error during subscription processing: {subscriptionName} {exception}",
+                    subscriptionName, exception);
+            };
+
+
+            var cancellationTokenSource = new CancellationTokenSource();
+            var ct = cancellationTokenSource.Token;
+            
+
+            Task.Run(async () =>
+            {
+                try
+                {
+                    while (!ct.IsCancellationRequested)
+                    {
+                        await subscriptionWorker.Run(batch =>
+                        {
+                            foreach (var item in batch.Items)
+                            {
+                                _logger.LogInformation($"Product have changed {item.Id}");
+                            }
+                        }, ct);
+                    }
+                }
+                finally
+                {
+                    subscriptionWorker.Dispose();
+                    _raven.Store.Subscriptions.Delete(subscriptionName);
+                }
+            }, ct);
+
+            Console.ReadLine();
+            cancellationTokenSource.Cancel();
+
+            return new object();
+        }
     }
 
     public enum PerformOperation
     {
+        SubscribeToProductCollection,
         SearchForEmployeeByFullName,
         SuggestEmployeeNames,
         FetchOrdersInRange
