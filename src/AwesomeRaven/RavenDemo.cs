@@ -22,22 +22,19 @@ namespace AwesomeRaven
         public RavenDemo(IRavenClient raven, ILogger<RavenDemo> logger) =>
             (_raven, _logger) = (raven, logger);
 
-        public async Task<object> Execute(PerformOperation operation) =>
+        public async Task<object> Execute(PerformOperation operation, string input) =>
             operation switch
             {
-                PerformOperation.SearchForEmployeeByFullName => await this.SearchForEmployeeByFullNameAsync(),
+                PerformOperation.SearchForEmployeeByFullName => await this.SearchForEmployeeByFullNameAsync(input),
                 PerformOperation.FetchOrdersInRange => await this.LoadOrdersInRangeAsync(),
-                PerformOperation.SuggestEmployeeNames => await this.SuggestEmployeeNamesAsync(),
+                PerformOperation.SuggestEmployeeNames => await this.SuggestEmployeeNamesAsync(input),
                 PerformOperation.SubscribeToProductCollection => SubscribeToProductCollection(),
                 _ => new object()
             };
 
 
-        private async Task<object> SearchForEmployeeByFullNameAsync()
+        private async Task<object> SearchForEmployeeByFullNameAsync(string employeeName)
         {
-            _logger.LogInformation("Please input fragments of first and last name separated by space.");
-            var employeeName = Console.ReadLine();
-
             var searchFragments =
                 employeeName?.Split(new[] {' ', ':', ';'}, StringSplitOptions.RemoveEmptyEntries);
 
@@ -75,11 +72,8 @@ namespace AwesomeRaven
             return employee;
         }
 
-        private async Task<object> SuggestEmployeeNamesAsync()
+        public async Task<List<string>> SuggestEmployeeNamesAsync(string messedUpName)
         {
-            _logger.LogInformation("Please try to input full name.");
-            var messedUpName = Console.ReadLine();
-
             using var session = _raven.Store.OpenAsyncSession();
             _logger.LogTrace("Opened a RavenDb connection.");
 
@@ -91,7 +85,8 @@ namespace AwesomeRaven
                 .SelectFields<SuggestedEmployee>()
                 .ToListAsync();
 
-            var suggestedNames = suggestedEmployees.Select(e => $"{e.FirstName} {e.LastName}");
+            var suggestedNames = suggestedEmployees.Select(e => $"{e.FirstName} {e.LastName}")
+                .ToList();
 
             _logger.LogTrace("Executed {amount} call/s to database", session.Advanced.NumberOfRequests);
             _logger.LogInformation("Did you mean any of these employees?");
@@ -112,7 +107,7 @@ namespace AwesomeRaven
 
         private object SubscribeToProductCollection()
         {
-            var subscriptionName= _raven.Store.Subscriptions.Create<Product>();
+            var subscriptionName = _raven.Store.Subscriptions.Create<Product>();
 
             var options = new SubscriptionWorkerOptions(subscriptionName)
             {
@@ -121,13 +116,13 @@ namespace AwesomeRaven
             };
 
             var subscriptionWorker = _raven.Store.Subscriptions.GetSubscriptionWorker<Product>(options);
-                
+
             subscriptionWorker.OnSubscriptionConnectionRetry += exception =>
             {
                 _logger.LogWarning("Error during subscription processing: {subscriptionName} {exception}",
                     subscriptionName, exception);
             };
-            
+
             var cancellationTokenSource = new CancellationTokenSource();
             var ct = cancellationTokenSource.Token;
 
