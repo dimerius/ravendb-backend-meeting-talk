@@ -7,6 +7,7 @@ using Xunit;
 
 namespace AwesomeRaven.Tests.Search
 {
+    [Collection("Tests over Employee collection")]
     public class SuggestEmployeesFullNameTests : IClassFixture<SearchByFullNameFragmentsFixture>
     {
         private readonly SearchByFullNameFragmentsFixture _raven;
@@ -26,12 +27,11 @@ namespace AwesomeRaven.Tests.Search
         [InlineData("Tobert King", "Robert King")]
         [InlineData("Robert K", "Robert King")]
         [InlineData("L Callahan", "Laura Callahan")]
-        public async Task Should_Suggest_Employee_Fullname(string input, string expected)
+        public async Task ShouldSuggestEmployeeFullName(string input, string expected)
         {
-            await _raven.PrepareData();
-            
             var result = await RavenDemo.SuggestEmployeeNamesAsync(input);
             
+            result.Count.ShouldBe(1);
             result.ShouldContain(expected);
         }
         
@@ -43,10 +43,8 @@ namespace AwesomeRaven.Tests.Search
         [InlineData("", "Robert King")]
         [InlineData("       ", "Robert King")]
         [InlineData("rob ki", "Robert King")]
-        public async Task Should_Not_Suggest_Employee_Fullname(string input, string expected)
+        public async Task ShouldNotSuggestEmployeeFullName(string input, string expected)
         {
-            await _raven.PrepareData();
-            
             var result = await RavenDemo.SuggestEmployeeNamesAsync(input);
             
             result.ShouldNotContain(expected);

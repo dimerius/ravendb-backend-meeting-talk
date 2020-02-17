@@ -22,6 +22,8 @@ namespace AwesomeRaven.Tests.Fixtures.Employees.SearchInEmployees
         public SearchByFullNameFragmentsFixture()
         {
             _raven = new RavenDbTestClient();
+            //seed database
+            this.PrepareData().Wait();
         }
 
         public async Task PrepareData()
