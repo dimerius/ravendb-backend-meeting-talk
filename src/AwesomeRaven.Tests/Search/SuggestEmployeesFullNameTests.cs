@@ -11,13 +11,11 @@ namespace AwesomeRaven.Tests.Search
     [Collection("Tests over Employee collection")]
     public class SuggestEmployeesFullNameTests : IClassFixture<SearchByFullNameFragmentsFixture>
     {
-        private readonly SearchByFullNameFragmentsFixture _raven;
-
-        private readonly ILogger<RavenDemo> _fakeLogger = A.Fake<ILogger<RavenDemo>>();
-
-        private RavenDemo RavenDemo => new RavenDemo(_raven, _fakeLogger);
-
-        public SuggestEmployeesFullNameTests(SearchByFullNameFragmentsFixture raven) => _raven = raven;
+        private readonly RavenDemo _sut;
+        public SuggestEmployeesFullNameTests(SearchByFullNameFragmentsFixture raven)
+        {
+            _sut = new RavenDemo(raven, A.Fake<ILogger<RavenDemo>>());
+        }
         
         [Theory]
         [InlineData("laura callahan", "Laura Callahan")]
@@ -29,7 +27,7 @@ namespace AwesomeRaven.Tests.Search
         [InlineData("L Callahan", "Laura Callahan")]
         public async Task ShouldSuggestEmployeeFullName(string input, string expected)
         {
-            var result = await RavenDemo.SuggestEmployeeNamesAsync(input);
+            var result = await _sut.SuggestEmployeeNamesAsync(input);
    
             result.ShouldContain(expected);
         }
@@ -44,7 +42,7 @@ namespace AwesomeRaven.Tests.Search
         [InlineData("rob ki", "Robert King")]
         public async Task ShouldNotSuggestEmployeeFullName(string input, string expected)
         {
-            var result = await RavenDemo.SuggestEmployeeNamesAsync(input);
+            var result = await _sut.SuggestEmployeeNamesAsync(input);
             
             result.ShouldNotContain(expected);
         }
