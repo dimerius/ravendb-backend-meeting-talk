@@ -23,21 +23,21 @@ namespace AwesomeRaven.Tests.Fixtures.Employees.SearchInEmployees
         {
             _raven = new RavenDbTestClient();
             //seed database
-            this.PrepareData().Wait();
+            this.PrepareData();
         }
 
-        public async Task PrepareData()
+        public void PrepareData()
         {
-            using var session = _raven.Store.OpenAsyncSession();
+            using var session = _raven.Store.OpenSession();
 
             var employees = new EmployeeCollection().Employees();
 
             foreach (var employee in employees)
             {
-                await session.StoreAsync(employee);
+                session.Store(employee);
             }
 
-            await session.SaveChangesAsync();
+            session.SaveChanges();
             session.Advanced.WaitForIndexesAfterSaveChanges();
         }
 

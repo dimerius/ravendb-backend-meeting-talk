@@ -4,6 +4,6 @@ namespace AwesomeRaven.Tests.Fixtures
 {
     public interface IHaveDataSetup
     {
-        Task PrepareData();
+        void PrepareData();
     }
 }
