@@ -8,7 +8,7 @@ using Xunit;
 namespace AwesomeRaven.Tests.Search
 {
     [Trait("Category", "Employee")]
-    [Collection("Tests over Employee collection")]
+    [Collection("Tests with RavenDb data")]
     public class SuggestEmployeesFullNameTests : IClassFixture<SearchByFullNameFragmentsFixture>
     {
         private readonly RavenDemo _sut;
