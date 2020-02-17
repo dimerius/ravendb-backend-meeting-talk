@@ -12,9 +12,8 @@ namespace AwesomeRaven.Tests.Fixtures
 
         public RavenDbTestClient()
         {
-            var configuration = new AppTestConfiguration();
             var ravenConfiguration = new RavenConfiguration();
-            configuration.Configuration.GetSection("RavenDb:AwesomeRaven").Bind(ravenConfiguration);
+            AppTestConfiguration.Configuration.GetSection("RavenDb:AwesomeRaven").Bind(ravenConfiguration);
             
             _store = new RavenClient(ravenConfiguration).Store;
         }
