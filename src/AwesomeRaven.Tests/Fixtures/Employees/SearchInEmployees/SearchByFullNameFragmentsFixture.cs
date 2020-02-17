@@ -1,15 +1,9 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using AwesomeRaven.Entities;
-using AwesomeRaven.Entities.ValueObjects;
 using AwesomeRaven.Raven;
-using AwesomeRaven.Raven.Indexes;
 using AwesomeRaven.Tests.Fixtures.Data;
 using Raven.Client.Documents;
-using Xunit;
 
 namespace AwesomeRaven.Tests.Fixtures.Employees.SearchInEmployees
 {
