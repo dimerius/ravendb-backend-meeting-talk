@@ -29,18 +29,19 @@ namespace AwesomeRaven
                 PerformOperation.FetchOrdersInRange => await this.LoadOrdersInRangeAsync(),
                 PerformOperation.SuggestEmployeeNames => await this.SuggestEmployeeNamesAsync(input),
                 PerformOperation.SubscribeToProductCollection => SubscribeToProductCollection(),
+                PerformOperation.FetchTotalIncomeForCompanies => await this.FetchTotalIncomeForCompaniesAsync(),
                 _ => new object()
             };
 
 
-        private async Task<object> SearchForEmployeeByFullNameAsync(string employeeName)
+        public async Task<List<string>> SearchForEmployeeByFullNameAsync(string employeeName)
         {
             var searchFragments =
                 employeeName?.Split(new[] {' ', ':', ';'}, StringSplitOptions.RemoveEmptyEntries);
 
             if (searchFragments is null || searchFragments.Length == 0)
             {
-                return new List<object>();
+                return new List<string>();
             }
 
             var firstName = searchFragments.First();
@@ -64,12 +65,16 @@ namespace AwesomeRaven
 
             var employee = await employeeQuery
                 .Take(20)
-                .Select(e => new {e.FirstName, e.LastName})
+                .Select(e => new
+                {
+                    e.FirstName,
+                    e.LastName
+                })
                 .ToListAsync();
 
             _logger.LogTrace("Executed {amount} call/s to database", session.Advanced.NumberOfRequests);
 
-            return employee;
+            return employee.Select(e => $"{e.FirstName} {e.LastName}").ToList();
         }
 
         public async Task<List<string>> SuggestEmployeeNamesAsync(string messedUpName)
@@ -153,6 +158,18 @@ namespace AwesomeRaven
 
             return new object();
         }
+
+        private async Task<List<Orders_ByCompany.Orders_ByCompany_Result>> FetchTotalIncomeForCompaniesAsync()
+        {
+            using var session = _raven.Store.OpenAsyncSession();
+
+            var companiesWithTotalSales = await session.Query<Orders_ByCompany.Orders_ByCompany_Result, Orders_ByCompany>()
+                .OrderByDescending(res => res.Total)
+                .Take(10)
+                .ToListAsync();
+            
+            return companiesWithTotalSales;
+        }
     }
 
     public enum PerformOperation
@@ -160,6 +177,7 @@ namespace AwesomeRaven
         SubscribeToProductCollection,
         SearchForEmployeeByFullName,
         SuggestEmployeeNames,
-        FetchOrdersInRange
+        FetchOrdersInRange,
+        FetchTotalIncomeForCompanies
     }
 }
