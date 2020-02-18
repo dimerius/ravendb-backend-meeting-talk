@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using AwesomeRaven.Raven;
 using AwesomeRaven.Tests.Fixtures.Employees.SearchInEmployees;
 using FakeItEasy;
 using Microsoft.Extensions.Logging;
@@ -9,14 +10,13 @@ namespace AwesomeRaven.Tests.Search
 {
     [Trait("Category", "Employee")]
     [Collection("Tests with RavenDb data")]
-    public class SuggestEmployeesFullNameTests : IClassFixture<SearchByFullNameFragmentsFixture>
+    public class SuggestEmployeeNamesTests : IClassFixture<SearchByFullNameFragmentsFixture>
     {
-        private readonly RavenDemo _sut;
-        public SuggestEmployeesFullNameTests(SearchByFullNameFragmentsFixture raven)
-        {
-            _sut = new RavenDemo(raven, A.Fake<ILogger<RavenDemo>>());
-        }
-        
+        private RavenDemo Sut => new RavenDemo(_raven, A.Fake<ILogger<RavenDemo>>());
+
+        private readonly IRavenClient _raven;
+        public SuggestEmployeeNamesTests(SearchByFullNameFragmentsFixture raven) => _raven = raven;
+
         [Theory]
         [InlineData("laura callahan", "Laura Callahan")]
         [InlineData("Laura Callaha", "Laura Callahan")]
@@ -27,11 +27,11 @@ namespace AwesomeRaven.Tests.Search
         [InlineData("L Callahan", "Laura Callahan")]
         public async Task ShouldSuggestEmployeeFullName(string input, string expected)
         {
-            var result = await _sut.SuggestEmployeeNamesAsync(input);
-   
+            var result = await Sut.SuggestEmployeeNamesAsync(input);
+
             result.ShouldContain(expected);
         }
-        
+
         [Theory]
         [InlineData("L C", "Laura Callahan")]
         [InlineData("Laura", "Laura Callahan")]
@@ -42,8 +42,8 @@ namespace AwesomeRaven.Tests.Search
         [InlineData("rob ki", "Robert King")]
         public async Task ShouldNotSuggestEmployeeFullName(string input, string expected)
         {
-            var result = await _sut.SuggestEmployeeNamesAsync(input);
-            
+            var result = await Sut.SuggestEmployeeNamesAsync(input);
+
             result.ShouldNotContain(expected);
         }
     }
