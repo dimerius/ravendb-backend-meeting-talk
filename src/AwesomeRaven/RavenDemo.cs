@@ -54,7 +54,7 @@ namespace AwesomeRaven
             _logger.LogTrace("Opened a RavenDb connection.");
 
             var employeeQuery =
-                session.Query<Employee>()
+                session.Query<Employee, Employee_Search_ByName>()
                     .Search(e => e.FirstName, firstNameFragment);
 
             if (!(lastNameFragment is null))
