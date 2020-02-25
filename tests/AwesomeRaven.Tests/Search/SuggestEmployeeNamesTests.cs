@@ -27,7 +27,7 @@ namespace AwesomeRaven.Tests.Search
         [InlineData("L Callahan", "Laura Callahan")]
         public async Task ShouldSuggestEmployeeFullName(string input, string expected)
         {
-            var result = await Sut.SuggestEmployeeNamesAsync(input);
+            var result = await Sut.SuggestEmployeeNameAsync(input);
 
             result.ShouldContain(expected);
         }
@@ -42,7 +42,7 @@ namespace AwesomeRaven.Tests.Search
         [InlineData("rob ki", "Robert King")]
         public async Task ShouldNotSuggestEmployeeFullName(string input, string expected)
         {
-            var result = await Sut.SuggestEmployeeNamesAsync(input);
+            var result = await Sut.SuggestEmployeeNameAsync(input);
 
             result.ShouldNotContain(expected);
         }

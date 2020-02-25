@@ -27,7 +27,7 @@ namespace AwesomeRaven
             {
                 PerformOperation.SearchForEmployeeByFullName => await this.SearchForEmployeeByFullNameAsync(input),
                 PerformOperation.FetchOrdersInRange => await this.LoadOrdersInRangeAsync(),
-                PerformOperation.SuggestEmployeeNames => await this.SuggestEmployeeNamesAsync(input),
+                PerformOperation.SuggestEmployeeName => await this.SuggestEmployeeNameAsync(input),
                 PerformOperation.SubscribeToProductCollection => SubscribeToProductCollection(),
                 PerformOperation.FetchTotalIncomeForCompanies => await this.FetchTotalIncomeForCompaniesAsync(),
                 _ => new object()
@@ -77,7 +77,7 @@ namespace AwesomeRaven
             return employee.Select(e => $"{e.FirstName} {e.LastName}").ToList();
         }
 
-        public async Task<List<string>> SuggestEmployeeNamesAsync(string messedUpName)
+        public async Task<List<string>> SuggestEmployeeNameAsync(string messedUpName)
         {
             using var session = _raven.Store.OpenAsyncSession();
             _logger.LogTrace("Opened a RavenDb connection.");
@@ -177,7 +177,7 @@ namespace AwesomeRaven
     {
         SubscribeToProductCollection,
         SearchForEmployeeByFullName,
-        SuggestEmployeeNames,
+        SuggestEmployeeName,
         FetchOrdersInRange,
         FetchTotalIncomeForCompanies
     }

@@ -42,7 +42,7 @@ namespace AwesomeRaven
             var demo = serviceProvider.GetService<RavenDemo>();
 
             var input = Console.ReadLine();
-            var result = await demo.Execute(PerformOperation.FetchTotalIncomeForCompanies, input);
+            var result = await demo.Execute(PerformOperation.SuggestEmployeeName, input);
 
             logger.LogInformation(JsonConvert.SerializeObject(result, Formatting.Indented));
         }
