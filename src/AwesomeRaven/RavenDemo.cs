@@ -117,7 +117,8 @@ namespace AwesomeRaven
             var options = new SubscriptionWorkerOptions(subscriptionName)
             {
                 MaxErroneousPeriod = TimeSpan.FromMinutes(2),
-                TimeToWaitBeforeConnectionRetry = TimeSpan.FromSeconds(5)
+                TimeToWaitBeforeConnectionRetry = TimeSpan.FromSeconds(5),
+                MaxDocsPerBatch = 10
             };
 
             var subscriptionWorker = _raven.Store.Subscriptions.GetSubscriptionWorker<Product>(options);
